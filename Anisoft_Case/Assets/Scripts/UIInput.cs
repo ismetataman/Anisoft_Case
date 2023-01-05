@@ -5,7 +5,13 @@ using UnityEngine.EventSystems;
 
 public class UIInput : MonoBehaviour, IDragHandler, IPointerDownHandler
 {
-
+    private void Update()
+    {
+        if (GameManager.instance.currentState == GameState.ChangeColor)
+        {
+            GameManager.instance.MoveObjectsDown();
+        }
+    }
     public void OnDrag(PointerEventData eventData)
     {
         if (eventData.delta.y < 0 && GameManager.instance.currentState == GameState.Pour)
@@ -20,7 +26,6 @@ public class UIInput : MonoBehaviour, IDragHandler, IPointerDownHandler
     {
         if (GameManager.instance.currentState == GameState.Start)
         {
-            GameManager.instance.currentState = GameState.Pour;
             StartCoroutine(GameManager.instance.Begin());
         }
         else if (GameManager.instance.currentState == GameState.Mix)
@@ -29,7 +34,7 @@ public class UIInput : MonoBehaviour, IDragHandler, IPointerDownHandler
             StartCoroutine(GameManager.instance.ColorPicker());
             StartCoroutine(GameManager.instance.DestroyColors());
             StartCoroutine(GameManager.instance.EmptyMixer());
-            
+
         }
         else if (GameManager.instance.currentState == GameState.Dip)
         {

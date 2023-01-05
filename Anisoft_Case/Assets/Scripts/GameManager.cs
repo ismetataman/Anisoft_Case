@@ -8,7 +8,9 @@ public enum GameState
     Pour,
     Mix,
     Blend,
-    Dip
+    Dip,
+    ChangeColor,
+    Complete
 }
 public class GameManager : MonoBehaviour
 {
@@ -22,17 +24,24 @@ public class GameManager : MonoBehaviour
     public Obi.ObiEmitter emitter2;
     public Obi.ObiParticleRenderer renderer1;
     public Obi.ObiParticleRenderer renderer2;
+    public Color newColor;
 
 
     [Header("Bowl")]
     public Transform bowl;
     public Transform bowlDesPos;
+    public Transform emptyBowl;
 
     [Header("Mixer Parts")]
     public Transform mixer;
     public Transform mixerPart;
     public GameObject mixerTop;
     public Transform mixerPartDesPos;
+
+    [Header("Xbox & Stick")]
+    public GameObject xbox;
+    public GameObject stick;
+    
 
     public float time;
 
@@ -66,13 +75,13 @@ public class GameManager : MonoBehaviour
 
 
         float average = Mathf.RoundToInt(100 * (valueColorR + valueColorG + valueColorB) / 3);
-        Color newColor = new Color(valueColorR, valueColorG, valueColorB);
-        yield return new WaitForSeconds(1f);
-        renderer1.particleColor = Color.Lerp(renderer1.particleColor, newColor / 1.2f, 1f);
-        renderer2.particleColor = Color.Lerp(renderer2.particleColor, newColor / 1.2f, 1f);
+        newColor = new Color(valueColorR, valueColorG, valueColorB);
         yield return new WaitForSeconds(1f);
         renderer1.particleColor = Color.Lerp(renderer1.particleColor, newColor, 1f);
         renderer2.particleColor = Color.Lerp(renderer2.particleColor, newColor, 1f);
+        yield return new WaitForSeconds(1f);
+        renderer1.particleColor = Color.Lerp(renderer1.particleColor, newColor * 1.1f, 1f);
+        renderer2.particleColor = Color.Lerp(renderer2.particleColor, newColor * 1.1f, 1f);
     }
 
 
@@ -81,6 +90,7 @@ public class GameManager : MonoBehaviour
         bowl.DOMove(bowlDesPos.position, time);
         yield return new WaitForSeconds(1f);
         mixerPart.DOMove(mixerPartDesPos.position, time);
+        currentState = GameState.Pour;
     }
 
     public IEnumerator PourTheBowl()
@@ -108,7 +118,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(2f);
         mixer.DORotate(new Vector3(0, -90, 0), 1f);
         yield return new WaitForSeconds(.5f);
-        mixer.DOMoveX(5f,2f);
+        mixer.DOMoveX(5f, 2f);
         currentState = GameState.Dip;
     }
     public IEnumerator DestroyColors()
@@ -123,9 +133,38 @@ public class GameManager : MonoBehaviour
     public IEnumerator DipTheObject()
     {
         yield return new WaitForSeconds(0.5f);
-        cam.transform.DOMove(new Vector3(cam.transform.position.x,cam.transform.position.y,-3f),1f);
-        cam.transform.DORotate(new Vector3(60,0,0),1f);
+        cam.transform.DOMove(new Vector3(cam.transform.position.x, cam.transform.position.y, -3f), 1f);
+        cam.transform.DORotate(new Vector3(60, 0, 0), 1f);
+        xbox.transform.DOMoveY(0, 1f);
+        currentState = GameState.ChangeColor;
+    }
+
+    public void MoveObjectsDown()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            xbox.transform.DOMoveY(-1, 1f);
+            Debug.Log("Mouse Down");
+        }
+        if(Input.GetMouseButtonUp(0))
+        {
+            xbox.transform.DOMoveY(0f, 1f);
+            currentState = GameState.Complete;
+            StartCoroutine(ShowTheObject());
+            Debug.Log("Mouse Up");
+        }
 
     }
+
+    IEnumerator ShowTheObject()
+    {
+        yield return new WaitForSeconds(1f);
+        stick.transform.parent = null;
+        stick.transform.DOMoveY(3f,1f);
+        emptyBowl.transform.DOMoveX(-4,1f);
+        yield return new WaitForSeconds(1);
+        xbox.transform.DORotate(new Vector3(-20,0,180),1f);
+    }
+
 
 }
