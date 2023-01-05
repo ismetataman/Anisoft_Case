@@ -12,7 +12,6 @@ public class UIInput : MonoBehaviour, IDragHandler, IPointerDownHandler
         {
             GameManager.instance.currentState = GameState.Mix;
             StartCoroutine(GameManager.instance.PourTheBowl());
-            Debug.Log(eventData.delta.y);
         }
 
     }
@@ -30,7 +29,11 @@ public class UIInput : MonoBehaviour, IDragHandler, IPointerDownHandler
             StartCoroutine(GameManager.instance.ColorPicker());
             StartCoroutine(GameManager.instance.DestroyColors());
             StartCoroutine(GameManager.instance.EmptyMixer());
-            Debug.Log("Blending");
+            
+        }
+        else if (GameManager.instance.currentState == GameState.Dip)
+        {
+            StartCoroutine(GameManager.instance.DipTheObject());
         }
 
     }
