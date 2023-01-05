@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 
 public class UIInput : MonoBehaviour, IDragHandler, IPointerDownHandler
 {
+
     public void OnDrag(PointerEventData eventData)
     {
         if (eventData.delta.y < 0 && GameManager.instance.currentState == GameState.Pour)
@@ -23,10 +24,16 @@ public class UIInput : MonoBehaviour, IDragHandler, IPointerDownHandler
             GameManager.instance.currentState = GameState.Pour;
             StartCoroutine(GameManager.instance.Begin());
         }
-        else if(GameManager.instance.currentState == GameState.Mix)
+        else if (GameManager.instance.currentState == GameState.Mix)
         {
-            Debug.Log("Mixing");
+            GameManager.instance.currentState = GameState.Blend;
+            StartCoroutine(GameManager.instance.ColorPicker());
+            StartCoroutine(GameManager.instance.DestroyColors());
+            StartCoroutine(GameManager.instance.EmptyMixer());
+            Debug.Log("Blending");
         }
 
     }
+
+
 }
