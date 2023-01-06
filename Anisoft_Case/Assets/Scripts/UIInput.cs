@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 
 public class UIInput : MonoBehaviour, IDragHandler, IPointerDownHandler
 {
+    public UIManager uIManager;
     private void Update()
     {
         if (GameManager.instance.currentState == GameState.ChangeColor)

@@ -14,6 +14,7 @@ public enum GameState
 }
 public class GameManager : MonoBehaviour
 {
+    public UIManager uIManager;
     public List<GameObject> colors = new List<GameObject>();
     public static GameManager instance;
     public GameState currentState = GameState.Start;
@@ -87,26 +88,37 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator Begin()
     {
+        uIManager.SetInactive();
         bowl.DOMove(bowlDesPos.position, time);
         yield return new WaitForSeconds(1f);
         mixerPart.DOMove(mixerPartDesPos.position, time);
         currentState = GameState.Pour;
+        yield return new WaitForSeconds(.5f);
+        uIManager.SwipeFingerDown();
+        
     }
 
     public IEnumerator PourTheBowl()
     {
+        uIManager.SwipeFingerDownInactive();
         bowl.DOMoveX(-0.15f, 1f);
         yield return new WaitForSeconds(0.5f);
         bowl.DORotate(new Vector3(0, 0, -120), 1f);
+        yield return new WaitForSeconds(0.5f);
+        SoundManager.DropSound();
         yield return new WaitForSeconds(1.2f);
         bowl.DOMoveY(3f, 1f);
         mixerPart.DOLocalMove(new Vector3(0.001766419f, 0.04385072f, mixerPart.transform.localPosition.z), 1f);
         cam.transform.DOMove(new Vector3(0, 1.186f, -5f), 1f);
         cam.transform.DORotate(new Vector3(17f, 0, 0), 1f);
+        uIManager.FingerTap();
+        
     }
 
     public IEnumerator EmptyMixer()
     {
+        SoundManager.MixerSound();
+        uIManager.SetInactive();
         yield return new WaitForSeconds(7f);
         mixer.DOMoveX(-1.5f, 2.5f);
         mixerPart.DOMoveX(-1.5f, 2.5f);
@@ -115,11 +127,13 @@ public class GameManager : MonoBehaviour
         cam.transform.DOMove(new Vector3(-2.2f, cam.transform.position.y, cam.transform.position.z), 2.5f);
         yield return new WaitForSeconds(2f);
         mixer.DORotate(new Vector3(120, -90, 0), 2f);
+        SoundManager.PourSound();
         yield return new WaitForSeconds(2f);
         mixer.DORotate(new Vector3(0, -90, 0), 1f);
         yield return new WaitForSeconds(.5f);
         mixer.DOMoveX(5f, 2f);
         currentState = GameState.Dip;
+        uIManager.FingerTap();
     }
     public IEnumerator DestroyColors()
     {
@@ -132,26 +146,29 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator DipTheObject()
     {
+        uIManager.SetInactive();
         yield return new WaitForSeconds(0.5f);
         cam.transform.DOMove(new Vector3(cam.transform.position.x, cam.transform.position.y, -3f), 1f);
         cam.transform.DORotate(new Vector3(60, 0, 0), 1f);
         xbox.transform.DOMoveY(0, 1f);
         currentState = GameState.ChangeColor;
+        uIManager.HoldToDip();
     }
 
     public void MoveObjectsDown()
     {
+        
         if (Input.GetMouseButtonDown(0))
         {
+            SoundManager.WaterShakeSound();
+            uIManager.SetInactive();
             xbox.transform.DOMoveY(-1, 1f);
-            Debug.Log("Mouse Down");
         }
         if(Input.GetMouseButtonUp(0))
         {
             xbox.transform.DOMoveY(0f, 1f);
             currentState = GameState.Complete;
             StartCoroutine(ShowTheObject());
-            Debug.Log("Mouse Up");
         }
 
     }
@@ -164,6 +181,8 @@ public class GameManager : MonoBehaviour
         emptyBowl.transform.DOMoveX(-4,1f);
         yield return new WaitForSeconds(1);
         xbox.transform.DORotate(new Vector3(-20,0,180),1f);
+        uIManager.confetti.SetActive(true);
+        SoundManager.WinSound();
     }
 
 
